@@ -31,6 +31,7 @@ class CountingCircuitBreakerTest {
 
         // then
         verify(beforeThresholdBreached, times(1)).accept(any());
+        circuitBreaker.reset();
     }
 
     @Test
@@ -47,6 +48,7 @@ class CountingCircuitBreakerTest {
             verify(beforeThresholdBreached, times(1)).accept(any());
             verify(afterThresholdBreached, times(1)).accept(2);
         });
+        circuitBreaker.reset();
     }
 
     @Test
@@ -66,6 +68,7 @@ class CountingCircuitBreakerTest {
             verify(beforeThresholdBreached, times(2)).accept(any());
             verify(afterThresholdBreached, times(1)).accept(3);
         });
+        circuitBreaker.reset();
     }
 
     @Test
@@ -84,6 +87,7 @@ class CountingCircuitBreakerTest {
             verify(beforeThresholdBreached, times(3)).accept(any());
             verify(afterThresholdBreached, never()).accept(any());
         });
+        circuitBreaker.reset();
     }
 
     @Test

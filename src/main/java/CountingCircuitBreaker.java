@@ -5,6 +5,7 @@ import java.util.TimerTask;
 import java.util.function.Consumer;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * An implementation of a count based windowed circuit breaker.
@@ -69,10 +70,10 @@ public class CountingCircuitBreaker {
         reset();
     }
 
-    private synchronized void reset() {
+    public synchronized void reset() {
         this.count = 0;
         this.thresholdBreached = false;
-        this.timer.cancel();
+        if (nonNull(this.timer)) this.timer.cancel();
         this.timer = null;
     }
 }
