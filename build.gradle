@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group 'uk.co.jamesmcnee'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+    testImplementation 'org.mockito:mockito-core:3.4.6'
+    testImplementation 'org.mockito:mockito-junit-jupiter:3.4.6'
+    testImplementation 'org.awaitility:awaitility:4.0.3'
+}
+
+test {
+    useJUnitPlatform()
+}
