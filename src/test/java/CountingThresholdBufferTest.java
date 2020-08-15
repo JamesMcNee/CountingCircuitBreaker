@@ -12,7 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CountingCircuitBreakerTest {
+class CountingThresholdBufferTest {
 
     @Mock
     private Consumer<Void> beforeThresholdBreached;
@@ -23,63 +23,63 @@ class CountingCircuitBreakerTest {
     @Test
     void givenThatThresholdNotBreached_shouldTriggerCorrectCallback() {
         // given
-        CountingCircuitBreaker circuitBreaker = new CountingCircuitBreaker(1, Duration.ofMinutes(1), beforeThresholdBreached, afterThresholdBreached);
+        CountingWindowedBuffer buffer = new CountingWindowedBuffer(1, Duration.ofMinutes(1), afterThresholdBreached);
 
         // when
-        circuitBreaker.increment();
-        circuitBreaker.increment();
+        buffer.increment(beforeThresholdBreached);
+        buffer.increment(beforeThresholdBreached);
 
         // then
         verify(beforeThresholdBreached, times(1)).accept(any());
-        circuitBreaker.reset();
+        buffer.reset();
     }
 
     @Test
     void givenThatThresholdBreached_shouldTriggerCorrectCallback() {
         // given
-        CountingCircuitBreaker circuitBreaker = new CountingCircuitBreaker(1, Duration.ofSeconds(1), beforeThresholdBreached, afterThresholdBreached);
+        CountingWindowedBuffer buffer = new CountingWindowedBuffer(1, Duration.ofSeconds(1), afterThresholdBreached);
 
         // when
-        circuitBreaker.increment();
-        circuitBreaker.increment();
+        buffer.increment(beforeThresholdBreached);
+        buffer.increment(beforeThresholdBreached);
 
         // then
         await().atMost(Duration.ofSeconds(3)).untilAsserted(() -> {
             verify(beforeThresholdBreached, times(1)).accept(any());
             verify(afterThresholdBreached, times(1)).accept(2);
         });
-        circuitBreaker.reset();
+        buffer.reset();
     }
 
     @Test
     void givenThatThresholdBreached_shouldTriggerCallbackWhenWindowExpires() throws InterruptedException {
         // given
-        CountingCircuitBreaker circuitBreaker = new CountingCircuitBreaker(1, Duration.ofSeconds(3), beforeThresholdBreached, afterThresholdBreached);
+        CountingWindowedBuffer buffer = new CountingWindowedBuffer(1, Duration.ofSeconds(3), afterThresholdBreached);
 
         // when
-        circuitBreaker.increment();
-        circuitBreaker.increment();
-        circuitBreaker.increment();
+        buffer.increment(beforeThresholdBreached);
+        buffer.increment(beforeThresholdBreached);
+        buffer.increment(beforeThresholdBreached);
         Thread.sleep(350); // Wait for window to expire
-        circuitBreaker.increment();
+        buffer.increment(beforeThresholdBreached);
 
         // then
         await().atMost(Duration.ofSeconds(4)).untilAsserted(() -> {
             verify(beforeThresholdBreached, times(2)).accept(any());
             verify(afterThresholdBreached, times(1)).accept(3);
         });
-        circuitBreaker.reset();
+        buffer.reset();
     }
 
     @Test
     void givenThatThresholdNotBreached_afterWindowExpires_shouldNotTriggerCallback() throws InterruptedException {
         // given
-        CountingCircuitBreaker circuitBreaker = new CountingCircuitBreaker(5, Duration.ofSeconds(3), beforeThresholdBreached, afterThresholdBreached);
+        CountingWindowedBuffer buffer = new CountingWindowedBuffer(5, Duration.ofSeconds(3), afterThresholdBreached);
 
         // when
-        circuitBreaker.increment();
-        circuitBreaker.increment();
-        circuitBreaker.increment();
+        buffer.increment(beforeThresholdBreached);
+        buffer.increment(beforeThresholdBreached);
+        buffer.increment(beforeThresholdBreached);
         Thread.sleep(350); // Wait for window to expire
 
         // then
@@ -87,16 +87,11 @@ class CountingCircuitBreakerTest {
             verify(beforeThresholdBreached, times(3)).accept(any());
             verify(afterThresholdBreached, never()).accept(any());
         });
-        circuitBreaker.reset();
-    }
-
-    @Test
-    void givenBeforeBreachedCallbackNotProvided_shouldThrowNullPointerException() {
-        assertThrows(NullPointerException.class, () -> new CountingCircuitBreaker(1, Duration.ZERO, null, afterThresholdBreached));
+        buffer.reset();
     }
 
     @Test
     void givenAfterBreachedCallbackNotProvided_shouldThrowNullPointerException() {
-        assertThrows(NullPointerException.class, () -> new CountingCircuitBreaker(1, Duration.ZERO, beforeThresholdBreached, null));
+        assertThrows(NullPointerException.class, () -> new CountingWindowedBuffer(1, Duration.ZERO, null));
     }
 }

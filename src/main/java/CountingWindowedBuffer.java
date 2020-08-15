@@ -8,16 +8,15 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
- * An implementation of a count based windowed circuit breaker.
+ * An implementation of a count based windowed buffer.
  *
  * Example usage:
  * This class could be used to prevent warn/error logs from overloading logging infrastructure in the event of an incident.
  */
-public class CountingCircuitBreaker {
+public class CountingWindowedBuffer implements ThresholdBuffer {
 
     private final int threshold;
     private final Duration thresholdWindow;
-    private final Consumer<Void> callbackBeforeThresholdBreached;
     private final Consumer<Integer> callbackAfterThresholdBreached;
 
     private int count;
@@ -25,26 +24,23 @@ public class CountingCircuitBreaker {
     private Timer timer;
 
     /**
-     * @param threshold the maximum number of occurrences before the circuit breaker is tripped
-     * @param thresholdWindow the period of time for which the circuit should be held open once breached
-     * @param callbackBeforeThresholdBreached the function that will be called until the circuit has been opened
-     * @param callbackAfterThresholdBreached the function that will be called after the circuit has been opened
+     * @param threshold the maximum number of occurrences before the threshold is breached
+     * @param thresholdWindow the period of time for which the buffer should be held open once breached
+     * @param callbackAfterThresholdBreached the function that will be called on increment once the buffer is active
      */
-    public CountingCircuitBreaker(int threshold, Duration thresholdWindow, Consumer<Void> callbackBeforeThresholdBreached,
-                                  Consumer<Integer> callbackAfterThresholdBreached) {
-        Objects.requireNonNull(callbackBeforeThresholdBreached, "Param callbackBeforeThresholdBreached must be provided");
+    public CountingWindowedBuffer(int threshold, Duration thresholdWindow, Consumer<Integer> callbackAfterThresholdBreached) {
         Objects.requireNonNull(callbackAfterThresholdBreached, "Param callbackAfterThresholdBreached must be provided");
 
         this.threshold = threshold;
         this.thresholdWindow = thresholdWindow;
-        this.callbackBeforeThresholdBreached = callbackBeforeThresholdBreached;
         this.callbackAfterThresholdBreached = callbackAfterThresholdBreached;
     }
 
     /**
      * Increment the number of occurrences.
+     * @param callbackBeforeThresholdBreached callback function that will be called if threshold has not been breached
      */
-    public synchronized void increment() {
+    public synchronized void increment(Consumer<Void> callbackBeforeThresholdBreached) {
         if (isNull(timer)) {
             timer = new Timer(true);
             timer.schedule(new TimerTask() {
