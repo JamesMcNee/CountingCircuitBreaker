@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.function.Consumer;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -83,5 +84,15 @@ class CountingCircuitBreakerTest {
             verify(beforeThresholdBreached, times(3)).accept(any());
             verify(afterThresholdBreached, never()).accept(any());
         });
+    }
+
+    @Test
+    void givenBeforeBreachedCallbackNotProvided_shouldThrowNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new CountingCircuitBreaker(1, Duration.ZERO, null, afterThresholdBreached));
+    }
+
+    @Test
+    void givenAfterBreachedCallbackNotProvided_shouldThrowNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new CountingCircuitBreaker(1, Duration.ZERO, beforeThresholdBreached, null));
     }
 }

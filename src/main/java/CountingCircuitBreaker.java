@@ -1,4 +1,5 @@
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
@@ -30,6 +31,9 @@ public class CountingCircuitBreaker {
      */
     public CountingCircuitBreaker(int threshold, Duration thresholdWindow, Consumer<Void> callbackBeforeThresholdBreached,
                                   Consumer<Integer> callbackAfterThresholdBreached) {
+        Objects.requireNonNull(callbackBeforeThresholdBreached, "Param callbackBeforeThresholdBreached must be provided");
+        Objects.requireNonNull(callbackAfterThresholdBreached, "Param callbackAfterThresholdBreached must be provided");
+
         this.threshold = threshold;
         this.thresholdWindow = thresholdWindow;
         this.callbackBeforeThresholdBreached = callbackBeforeThresholdBreached;
