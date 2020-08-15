@@ -9,7 +9,7 @@ The callback provided in the `acknowledge(Consumer<Void> ...)` method is called 
 
 Example basic usage:
 ```java
-private final CountingWinowedBuffer buffer = new CountingWinowedBuffer(5, Duration.ofMinutes(1),
+private final ThresholdBuffer buffer = new CountingWinowedBuffer(5, Duration.ofMinutes(1),
                 (count) -> LOGGER.error(String.format("Something catastrophic has happened %d times... This is a disaster!!", count)));
                 
 public void handleSomeAsyncAction(Action a) {

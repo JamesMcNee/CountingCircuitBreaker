@@ -15,7 +15,7 @@ import static org.mockito.Mockito.*;
 class CountingThresholdBufferTest {
 
     @Mock
-    private Consumer<Void> beforeThresholdBreached;
+    private Runnable beforeThresholdBreached;
 
     @Mock
     private Consumer<Integer> afterThresholdBreached;
@@ -30,7 +30,7 @@ class CountingThresholdBufferTest {
         buffer.increment(beforeThresholdBreached);
 
         // then
-        verify(beforeThresholdBreached, times(1)).accept(any());
+        verify(beforeThresholdBreached, times(1)).run();
         buffer.reset();
     }
 
@@ -45,7 +45,7 @@ class CountingThresholdBufferTest {
 
         // then
         await().atMost(Duration.ofSeconds(3)).untilAsserted(() -> {
-            verify(beforeThresholdBreached, times(1)).accept(any());
+            verify(beforeThresholdBreached, times(1)).run();
             verify(afterThresholdBreached, times(1)).accept(2);
         });
         buffer.reset();
@@ -65,7 +65,7 @@ class CountingThresholdBufferTest {
 
         // then
         await().atMost(Duration.ofSeconds(4)).untilAsserted(() -> {
-            verify(beforeThresholdBreached, times(2)).accept(any());
+            verify(beforeThresholdBreached, times(2)).run();
             verify(afterThresholdBreached, times(1)).accept(3);
         });
         buffer.reset();
@@ -84,7 +84,7 @@ class CountingThresholdBufferTest {
 
         // then
         await().atMost(Duration.ofSeconds(3)).untilAsserted(() -> {
-            verify(beforeThresholdBreached, times(3)).accept(any());
+            verify(beforeThresholdBreached, times(3)).run();
             verify(afterThresholdBreached, never()).accept(any());
         });
         buffer.reset();
