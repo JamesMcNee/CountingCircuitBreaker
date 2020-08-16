@@ -1,5 +1,3 @@
-import java.util.function.Consumer;
-
 public interface ThresholdBuffer {
 
     default void increment() {
