@@ -38,9 +38,9 @@ public class CountingWindowedBuffer implements ThresholdBuffer {
 
     /**
      * Increment the number of occurrences.
-     * @param callbackBeforeThresholdBreached callback function that will be called if threshold has not been breached
+     * @param callbackIfBufferNotActive callback function that will be called if threshold has not been breached
      */
-    public synchronized void increment(Runnable callbackBeforeThresholdBreached) {
+    public synchronized void increment(Runnable callbackIfBufferNotActive) {
         if (isNull(timer)) {
             timer = new Timer(true);
             timer.schedule(new TimerTask() {
@@ -54,7 +54,7 @@ public class CountingWindowedBuffer implements ThresholdBuffer {
         this.count += 1;
         this.thresholdBreached = count > threshold;
         if (!thresholdBreached) {
-            callbackBeforeThresholdBreached.run();
+            callbackIfBufferNotActive.run();
         }
     }
 

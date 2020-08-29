@@ -6,7 +6,7 @@ public interface ThresholdBuffer {
 
     /**
      * Increment the number of occurrences.
-     * @param callbackWhenClosed callback function that will be called if buffer is not yet active
+     * @param callbackIfBufferNotActive callback function that will be called if buffer is not yet active
      */
-    void increment(Runnable callbackWhenClosed);
+    void increment(Runnable callbackIfBufferNotActive);
 }
