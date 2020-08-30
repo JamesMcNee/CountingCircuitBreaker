@@ -5,7 +5,7 @@ A count + time based buffer that is useful for protecting logging infrastructure
 
 The concept behind this project is to stop systems like logging infrastructure from being overloaded in the event of an incident that would otherwise have generated thousands of log messages. Logging for eceptions that are exceptional and should rarely happen is very useful, this is not the case in a scenario where the majority of actions are causing an exception. This class provides a way to still log that there has been an incident but keeps a record of the number of occurrences, rather than each individually.
 
-The callback provided in the `acknowledge(Consumer<Void> ...)` method is called until the threshold defined in the buffer is exceeded at which point the callback provided in the constructor is used.
+The callback provided in the `acknowledge(Runnable ...)` method is called until the threshold defined in the buffer is exceeded at which point the callback provided in the constructor is used.
 
 Example basic usage:
 ```java
